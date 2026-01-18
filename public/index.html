@@ -1,1 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Biomecánico - Adapty Global</title>
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        .adapty-gradient {
+            background: linear-gradient(135deg, #00c853 0%, #00bcd4 25%, #7c4dff 50%, #e040fb 75%, #ff4081 100%);
+        }
+        .camera-container {
+            position: relative;
+            max-width: 100%;
+            aspect-ratio: 16/9;
+            background: #1a1a2e;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        video, canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .analyzing {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .risk-high {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 4px solid #dc2626;
+        }
+        .risk-medium {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left: 4px solid #f59e0b;
+        }
+        .risk-low {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border-left: 4px solid #16a34a;
+        }
+        .gemini-badge {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 8px currentColor;
+        }
+        .status-online { background: #10b981; color: #10b981; }
+        .status-offline { background: #ef4444; color: #ef4444; }
+        .lang-btn {
+            cursor: pointer;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+        .lang-btn.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            transition: all 0.3s;
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+        .btn-purple {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            transition: all 0.3s;
+        }
+        .btn-purple:hover {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            transition: all 0.3s;
+        }
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+        }
+        .logo-glow {
+            filter: drop-shadow(0 0 10px rgba(0, 188, 212, 0.3));
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="gradient-bg text-white shadow-xl">
+            <div class="max-w-7xl mx-auto px-4 py-5">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div class="flex items-center gap-4">
+                        <!-- Logo Adapty Global -->
+                        <img src="logo.jpg" alt="Adapty Global" class="h-14 w-auto rounded-lg logo-glow">
+                        <div>
+                            <h1 class="text-2xl md:text-3xl font-bold" id="headerTitle">Análisis Biomecánico</h1>
+                            <p class="text-blue-200 mt-1 text-sm md:text-base" id="headerSubtitle">Evaluación Ergonómica con IA</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <!-- Language Switcher -->
+                        <div class="flex gap-1 bg-white bg-opacity-10 rounded-lg p-1">
+                            <span class="lang-btn" data-lang="en">EN</span>
+                            <span class="lang-btn active" data-lang="es">ES</span>
+                        </div>
+                        <div class="gemini-badge">
+                            ⚡ Gemini AI
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
 
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <!-- System Status -->
+            <div id="systemStatus" class="mb-6 bg-white rounded-xl card-shadow p-4">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div class="flex items-center">
+                        <span class="status-dot status-offline" id="statusDot"></span>
+                        <span class="font-semibold text-gray-700" id="statusLabel">Estado del Sistema:</span>
+                        <span id="statusText" class="ml-2 text-gray-600">Verificando conexión...</span>
+                    </div>
+                    <button onclick="checkStatus()" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1" id="refreshBtn">
+                        🔄 <span>Actualizar</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Capture Panel -->
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2" id="captureTitle">
+                        <span class="text-3xl">📹</span> Captura de Imagen
+                    </h2>
+                    
+                    <div class="camera-container mb-5" id="cameraContainer">
+                        <video id="videoElement" autoplay playsinline class="hidden"></video>
+                        <canvas id="canvas" class="hidden"></canvas>
+                        <div id="placeholder" class="flex items-center justify-center h-full text-white">
+                            <div class="text-center p-6">
+                                <svg class="w-20 h-20 mx-auto mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-gray-300 text-lg font-medium" id="placeholderText">Captura tu postura de trabajo</p>
+                                <p class="text-gray-500 text-sm mt-2" id="placeholderSub">Usa la cámara o sube una foto</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button id="startCamera" class="w-full btn-primary text-white font-semibold py-3 px-6 rounded-xl flex items-center justify-center gap-2">
+                            <span class="text-xl">📷</span>
+                            <span id="btnStartCamera">Activar Cámara</span>
+                        </button>
+                        
+                        <button id="captureFrame" class="w-full btn-success text-white font-semibold py-3 px-6 rounded-xl hidden flex items-center justify-center gap-2">
+                            <span class="text-xl">📸</span>
+                            <span id="btnCapture">Capturar y Analizar</span>
+                        </button>
+
+                        <label class="w-full btn-purple text-white font-semibold py-3 px-6 rounded-xl cursor-pointer flex items-center justify-center gap-2">
+                            <span class="text-xl">📤</span>
+                            <span id="btnUpload">Subir Imagen</span>
+                            <input type="file" id="fileInput" accept="image/*,video/*" class="hidden">
+                        </label>
+
+                        <button id="stopCamera" class="w-full btn-danger text-white font-semibold py-3 px-6 rounded-xl hidden flex items-center justify-center gap-2">
+                            <span class="text-xl">⏹️</span>
+                            <span id="btnStop">Detener Cámara</span>
+                        </button>
+                    </div>
+
+                    <div id="loadingIndicator" class="hidden mt-5 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                        <div class="flex items-center space-x-3">
+                            <div class="analyzing">
+                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-blue-800 font-semibold" id="analyzingText">Analizando con Gemini AI...</p>
+                                <p class="text-blue-600 text-sm" id="analyzingTime">Esto puede tomar 5-10 segundos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Panel -->
+                <div class="bg-white rounded-xl card-shadow p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2" id="resultsTitle">
+                        <span class="text-3xl">📊</span> Resultados del Análisis
+                    </h2>
+                    
+                    <div id="resultsContainer" class="space-y-4">
+                        <div class="text-center py-16 text-gray-400">
+                            <svg class="w-20 h-20 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-lg font-medium" id="noAnalysisText">Sin análisis aún</p>
+                            <p class="text-sm mt-2" id="noAnalysisSub">Captura una imagen para comenzar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 py-6 bg-white border-t">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <img src="logo.jpg" alt="Adapty Global" class="h-10 w-auto rounded-lg">
+                        <span class="text-gray-600 font-medium">Adapty Global</span>
+                    </div>
+                    <p class="text-gray-500 text-sm text-center" id="footerText">
+                        Sistema de Análisis Biomecánico • Powered by Google Gemini AI
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Load language configuration -->
+    <script src="languages.js"></script>
+    
+    <script>
+        const API_BASE_URL = window.location.origin;
+        
+        let stream = null;
+        let lastAnalysis = null;
+        let currentLanguage = 'es'; // Default to Spanish
+
+        const elements = {
+            video: document.getElementById('videoElement'),
+            canvas: document.getElementById('canvas'),
+            placeholder: document.getElementById('placeholder'),
+            startBtn: document.getElementById('startCamera'),
+            captureBtn: document.getElementById('captureFrame'),
+            stopBtn: document.getElementById('stopCamera'),
+            fileInput: document.getElementById('fileInput'),
+            loading: document.getElementById('loadingIndicator'),
+            results: document.getElementById('resultsContainer'),
+            statusDot: document.getElementById('statusDot'),
+            statusText: document.getElementById('statusText')
+        };
+
+        // Initialize UI with current language
+        function updateUILanguage() {
+            const l = languages[currentLanguage];
+            
+            // Header
+            document.getElementById('headerTitle').textContent = l.header.title;
+            document.getElementById('headerSubtitle').textContent = l.header.subtitle;
+            
+            // Status
+            document.getElementById('statusLabel').textContent = l.status.title;
+            document.getElementById('refreshBtn').innerHTML = `🔄 <span>${l.status.refresh}</span>`;
+            
+            // Capture panel
+            document.getElementById('captureTitle').innerHTML = `<span class="text-3xl">📹</span> ${l.capture.title}`;
+            document.getElementById('placeholderText').textContent = l.capture.placeholder;
+            document.getElementById('placeholderSub').textContent = l.capture.placeholderSub;
+            document.getElementById('btnStartCamera').textContent = l.capture.startCamera;
+            document.getElementById('btnCapture').textContent = l.capture.captureAnalyze;
+            document.getElementById('btnUpload').textContent = l.capture.uploadImage;
+            document.getElementById('btnStop').textContent = l.capture.stopCamera;
+            document.getElementById('analyzingText').textContent = l.capture.analyzing;
+            document.getElementById('analyzingTime').textContent = l.capture.analyzingTime;
+            
+            // Results panel
+            document.getElementById('resultsTitle').innerHTML = `<span class="text-3xl">📊</span> ${l.results.title}`;
+            document.getElementById('noAnalysisText').textContent = l.results.noAnalysis;
+            document.getElementById('noAnalysisSub').textContent = l.results.noAnalysisSub;
+            
+            // Footer
+            document.getElementById('footerText').textContent = l.footer.copyright;
+            
+            // Update active language button
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.lang === currentLanguage) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Rerender results if they exist
+            if (lastAnalysis) {
+                displayResults(lastAnalysis);
+            }
+        }
+
+        // Language switcher
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentLanguage = btn.dataset.lang;
+                updateUILanguage();
+            });
+        });
+
+        // Initialize
+        updateUILanguage();
+        checkStatus();
+
+        // Check server status
+        async function checkStatus() {
+            const l = languages[currentLanguage];
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    elements.statusDot.className = 'status-dot status-online';
+                    elements.statusText.textContent = `${l.status.connected} - ${data.model}`;
+                    elements.statusText.className = 'ml-2 text-green-600 font-medium';
+                    
+                    if (!data.apiKeyConfigured) {
+                        showError(l.errors.apiKeyMissing);
+                    }
+                } else {
+                    throw new Error('Server error');
+                }
+            } catch (error) {
+                elements.statusDot.className = 'status-dot status-offline';
+                elements.statusText.textContent = l.status.disconnected;
+                elements.statusText.className = 'ml-2 text-red-600 font-medium';
+                console.error('Error checking status:', error);
+            }
+        }
+
+        // Start camera
+        elements.startBtn.addEventListener('click', async () => {
+            const l = languages[currentLanguage];
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false 
+                });
+                
+                elements.video.srcObject = stream;
+                elements.video.classList.remove('hidden');
+                elements.placeholder.classList.add('hidden');
+                
+                elements.startBtn.classList.add('hidden');
+                elements.captureBtn.classList.remove('hidden');
+                elements.stopBtn.classList.remove('hidden');
+            } catch (error) {
+                showError(l.errors.cameraAccess + error.message);
+            }
+        });
+
+        // Capture frame
+        elements.captureBtn.addEventListener('click', () => {
+            elements.canvas.width = elements.video.videoWidth;
+            elements.canvas.height = elements.video.videoHeight;
+            const ctx = elements.canvas.getContext('2d');
+            ctx.drawImage(elements.video, 0, 0);
+            
+            elements.canvas.toBlob((blob) => {
+                analyzeImage(blob);
+            }, 'image/jpeg', 0.90);
+        });
+
+        // Stop camera
+        elements.stopBtn.addEventListener('click', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                elements.video.srcObject = null;
+                elements.video.classList.add('hidden');
+                elements.placeholder.classList.remove('hidden');
+                
+                elements.startBtn.classList.remove('hidden');
+                elements.captureBtn.classList.add('hidden');
+                elements.stopBtn.classList.add('hidden');
+            }
+        });
+
+        // Upload file
+        elements.fileInput.addEventListener('change', (e) => {
+            const l = languages[currentLanguage];
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type.startsWith('image/')) {
+                analyzeImage(file);
+            } else if (file.type.startsWith('video/')) {
+                extractFrameFromVideo(file);
+            } else {
+                showError(l.errors.invalidFormat);
+            }
+        });
+
+        // Extract frame from video
+        function extractFrameFromVideo(videoFile) {
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(videoFile);
+            
+            video.addEventListener('loadeddata', () => {
+                video.currentTime = Math.min(2, video.duration / 2);
+            });
+
+            video.addEventListener('seeked', () => {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = video.videoWidth;
+                tempCanvas.height = video.videoHeight;
+                const ctx = tempCanvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                
+                tempCanvas.toBlob((blob) => {
+                    analyzeImage(blob);
+                    URL.revokeObjectURL(video.src);
+                }, 'image/jpeg', 0.90);
+            });
+        }
+
+        // Analyze image
+        async function analyzeImage(imageBlob) {
+            const l = languages[currentLanguage];
+            elements.loading.classList.remove('hidden');
+            elements.results.innerHTML = '<div class="text-center py-8 text-gray-500"><div class="animate-spin mx-auto w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"></div><p class="mt-4 font-medium">Procesando imagen...</p></div>';
+
+            try {
+                const base64Image = await blobToBase64(imageBlob);
+
+                const response = await fetch(`${API_BASE_URL}/api/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        imageData: base64Image,
+                        language: currentLanguage
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || data.error || 'Error en el análisis');
+                }
+
+                if (data.success && data.analysis) {
+                    lastAnalysis = data.analysis;
+                    displayResults(data.analysis);
+                } else {
+                    throw new Error('Respuesta del servidor inválida');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError(`❌ ${error.message}`);
+            } finally {
+                elements.loading.classList.add('hidden');
+            }
+        }
+
+        // Convert blob to base64
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        // Display results
+        function displayResults(analysis) {
+            const l = languages[currentLanguage];
+            
+            // Determine keys based on language
+            const keys = currentLanguage === 'es' 
+                ? {
+                    posture: 'postura_general',
+                    risks: 'riesgos',
+                    zone: 'zona',
+                    level: 'nivel',
+                    description: 'descripcion',
+                    recommendations: 'recomendaciones',
+                    score: 'puntuacion_ergonomica'
+                }
+                : {
+                    posture: 'posture_general',
+                    risks: 'risks',
+                    zone: 'zone',
+                    level: 'level',
+                    description: 'description',
+                    recommendations: 'recommendations',
+                    score: 'ergonomic_score'
+                };
+
+            const getRiskClass = (nivel) => {
+                const levelMap = { 'high': 'high', 'medium': 'medium', 'low': 'low', 
+                                  'alto': 'high', 'medio': 'medium', 'bajo': 'low' };
+                const mappedLevel = levelMap[nivel.toLowerCase()] || 'medium';
+                return `risk-${mappedLevel}`;
+            };
+
+            const getRiskBadge = (nivel) => {
+                const levelMap = { 'high': 'high', 'medium': 'medium', 'low': 'low',
+                                  'alto': 'high', 'medio': 'medium', 'bajo': 'low' };
+                const mappedLevel = levelMap[nivel.toLowerCase()] || 'medium';
+                const badges = {
+                    'high': 'bg-red-500 text-white',
+                    'medium': 'bg-yellow-500 text-white',
+                    'low': 'bg-green-500 text-white'
+                };
+                return badges[mappedLevel];
+            };
+
+            const getRiskLabel = (nivel) => {
+                const levelMap = { 'high': 'high', 'medium': 'medium', 'low': 'low',
+                                  'alto': 'high', 'medio': 'medium', 'bajo': 'low' };
+                const mappedLevel = levelMap[nivel.toLowerCase()] || 'medium';
+                return l.risks[mappedLevel];
+            };
+
+            // Score color based on value
+            const score = analysis[keys.score];
+            let scoreGradient = 'from-red-500 to-red-600';
+            if (score >= 70) scoreGradient = 'from-green-500 to-green-600';
+            else if (score >= 50) scoreGradient = 'from-yellow-500 to-yellow-600';
+            else if (score >= 30) scoreGradient = 'from-orange-500 to-orange-600';
+
+            elements.results.innerHTML = `
+                <div class="bg-gradient-to-r ${scoreGradient} text-white rounded-xl p-6 shadow-lg">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-white text-opacity-80 text-sm font-medium uppercase tracking-wide">${l.results.score}</p>
+                            <p class="text-5xl font-bold mt-1">${score}<span class="text-3xl">/100</span></p>
+                        </div>
+                        <div class="w-20 h-20 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                            <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+                    <h3 class="font-bold text-gray-800 mb-3 flex items-center text-lg">
+                        <span class="text-2xl mr-2">🧍</span>
+                        ${l.results.postureObserved}
+                    </h3>
+                    <p class="text-gray-700 leading-relaxed">${analysis[keys.posture]}</p>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center text-lg">
+                        <span class="text-2xl mr-2">⚠️</span>
+                        ${l.results.risksIdentified}
+                    </h3>
+                    <div class="space-y-3">
+                        ${analysis[keys.risks].map(risk => `
+                            <div class="rounded-xl p-4 ${getRiskClass(risk[keys.level])} shadow-sm">
+                                <div class="flex justify-between items-start gap-3">
+                                    <div class="flex-1">
+                                        <p class="font-bold text-gray-800 text-lg">${risk[keys.zone]}</p>
+                                        <p class="text-gray-600 mt-1">${risk[keys.description]}</p>
+                                    </div>
+                                    <span class="px-3 py-1 text-xs font-bold rounded-full ${getRiskBadge(risk[keys.level])} whitespace-nowrap shadow">
+                                        ${getRiskLabel(risk[keys.level])}
+                                    </span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center text-lg">
+                        <span class="text-2xl mr-2">✅</span>
+                        ${l.results.recommendations}
+                    </h3>
+                    <ul class="space-y-3">
+                        ${analysis[keys.recommendations].map((rec, i) => `
+                            <li class="flex items-start gap-3 bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100">
+                                <span class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">${i + 1}</span>
+                                <span class="text-gray-700">${rec}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 flex items-center justify-center gap-3 border">
+                    <img src="logo.jpg" alt="Adapty Global" class="h-8 w-auto rounded">
+                    <p class="text-sm text-gray-600">${l.results.poweredBy}</p>
+                </div>
+            `;
+        }
+
+        // Show error
+        function showError(message) {
+            const l = languages[currentLanguage];
+            elements.results.innerHTML = `
+                <div class="bg-red-50 border-2 border-red-200 rounded-xl p-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-red-800 font-bold text-lg">${l.errors.title}</p>
+                            <p class="text-red-600 mt-2">${message}</p>
+                            <button onclick="checkStatus()" class="mt-4 text-red-700 hover:text-red-900 font-medium text-sm underline">
+                                ${l.errors.serverDown}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Make checkStatus global
+        window.checkStatus = checkStatus;
+    </script>
+</body>
+</html>
